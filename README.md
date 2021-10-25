@@ -10,8 +10,8 @@ See [the documentation](https://getpocket.com/developer/docs/authentication) for
 on the authentication and authorization workflow and on how to obtain a platform consumer key for your application.
 
 ```javascript
-import { PocketClient } from 'pocket-client'
-import { createServer } from 'http'
+const { PocketClient } = require('pocket-client')
+const { createServer } = require('http')
 const open = require('open') // to open the authorization webpage
 
 // Setup the client with your application consumer key
@@ -54,9 +54,10 @@ const server = createServer(async (req, res) => {
                 <h1>Hello ${token.username}!</h1>
             </body>
         </html>`
-    ).end()
-        
-    // Shut down the server once everything is done
+    )
+
+    // Close the response and shut down the server once everything is done
+    res.end()
     server.close()
 })
 
