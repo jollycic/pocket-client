@@ -1,0 +1,12 @@
+# Intellij
+*.iml
+.idea
+
+# npm
+node_modules
+
+# Exclude sourcemaps
+*.map
+
+# Mac OS X
+.DS_Store
