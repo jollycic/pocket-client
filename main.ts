@@ -3,7 +3,7 @@
 import { IncomingMessage } from 'http'
 import { request } from 'https'
 
-export default class PocketClient implements PocketAPI {
+export class PocketClient implements PocketAPI {
     /**
      * Creates a new Pocket (https://getpocket.com) API client
      */
@@ -105,6 +105,38 @@ export default class PocketClient implements PocketAPI {
                 })
             })
     
+            req.on('error', (err) => {
+                this.logger.error(err)
+                resolve(null)
+            })
+
+            req.write(payload)
+    
+            req.end()
+        })
+    }
+
+    get (config: PocketGetOptions) : Promise<PocketList> {
+        config = config ?? {}
+        return new Promise((resolve) => {
+            const { options, payload } = this.#buildRequest('/v3/get', config)
+            let contents = ''
+            const req = request(options, (res) => {
+                res.on('data', (data) => {
+                    if (res.statusCode === 200) {
+                        contents += data
+                    } else {
+                        this.#logPocketError(res)
+                        resolve(null)
+                    }
+                })
+
+                res.on('end', () => {
+                    const { list } = JSON.parse(contents)
+                    resolve(list as PocketList)
+                })
+            })
+
             req.on('error', (err) => {
                 this.logger.error(err)
                 resolve(null)

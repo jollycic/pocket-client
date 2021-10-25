@@ -29,6 +29,20 @@ type PocketAddable = {
     tags?: string
 }
 
+type PocketGetOptions = {
+    state?: 'unread' | 'archive' | 'list'
+    favorite?: 0 | 1
+    sort?: 'newest' | 'oldest' | 'title' | 'site'
+    contentType?: 'article' | 'image' | 'video'
+    tag?: string | '_untagged_'
+    detailType?: 'simple' | 'complete'
+    search?: string
+    domain?: string
+    since?: number
+    count?: number
+    offset?: number
+}
+
 /** Item in a Pocket List */
 type PocketListItem = {
     item_id: string | number
@@ -53,6 +67,10 @@ type PocketListItem = {
     authors: string[]
     images: string[]
     videos: string[]
+}
+
+type PocketList = {
+    list: object
 }
 
 /** Configuration object to initialize a new instance of the Pocket API client */
@@ -101,4 +119,6 @@ declare class PocketAPI {
      * @returns Added article
      */
     add(article: PocketAddable) : Promise<PocketListItem>
+
+    get(config: PocketGetOptions) : Promise<PocketList>
 }
