@@ -3,12 +3,11 @@
 import { IncomingMessage } from 'http'
 import { request } from 'https'
 
-export default class PocketClient extends Pocket.API {
+export default class PocketClient implements PocketAPI {
     /**
-     * Creates a new Pocket (https://getpocket.com) API client
+     * Creates a new Pocket (https://getcom) API client
      */
-    constructor ({ consumer_key, token, logger } : Pocket.APIConfig) {
-        super({ consumer_key, token, logger })
+    constructor ({ consumer_key, token, logger } : PocketAPIConfig) {
 
         this.consumer_key = consumer_key
         
@@ -25,7 +24,7 @@ export default class PocketClient extends Pocket.API {
     consumer_key: string
     access_token: string
     username: string
-    requestToken: Pocket.RequestToken
+    requestToken: PocketRequestToken
     logger: Console
 
     requestAuthentication (redirect_uri: string) : Promise<URL> {
@@ -35,7 +34,7 @@ export default class PocketClient extends Pocket.API {
             const req = request(options, (res) => {
                 res.on('data', (data) => {
                     if (res.statusCode === 200) {
-                        this.requestToken = JSON.parse(data) as Pocket.RequestToken
+                        this.requestToken = JSON.parse(data) as PocketRequestToken
                         const { code } = this.requestToken
                         resolve(new URL(`https://${this.host}/auth/authorize?request_token=${code}&redirect_uri=${redirect_uri}`))
                     } else {
@@ -56,7 +55,7 @@ export default class PocketClient extends Pocket.API {
         })
     }
 
-    authorize () : Promise<Pocket.AccessToken> {
+    authorize () : Promise<PocketAccessToken> {
         const { code } = this.requestToken
 
         return new Promise((resolve) => {
@@ -64,7 +63,7 @@ export default class PocketClient extends Pocket.API {
             const req = request(options, (res) => {
                 res.on('data', (data) => {
                     if (res.statusCode === 200) {
-                        const accessToken = JSON.parse(data) as Pocket.AccessToken
+                        const accessToken = JSON.parse(data) as PocketAccessToken
                         this.access_token = accessToken.access_token
                         this.username = accessToken.username
                         resolve(accessToken)
@@ -86,17 +85,24 @@ export default class PocketClient extends Pocket.API {
         })
     }
 
-    add (article: Pocket.Addable) : Promise<Pocket.ListItem> {
-        return new Promise((resolve, reject) => {
+    add (article: PocketAddable) : Promise<PocketListItem> {
+        return new Promise((resolve) => {
             const { options, payload } = this.#buildRequest('/v3/add', article)
             const req = request(options, (res) => {
-                res.on('data', ({ item }) => {
-                    resolve(JSON.parse(item) as Pocket.ListItem)
+                res.on('data', (data) => {
+                    if (res.statusCode === 200) {
+                        const { item } = JSON.parse(data)
+                        resolve(item as PocketListItem)
+                    } else {
+                        this.#logPocketError(res)
+                        resolve(null)
+                    }
                 })
             })
     
             req.on('error', (err) => {
-                reject(err)
+                this.logger.error(err)
+                resolve(null)
             })
 
             req.write(payload)
@@ -105,7 +111,9 @@ export default class PocketClient extends Pocket.API {
         })
     }
 
-    // PRIVATE METHODS
+    /////////////////////
+    // PRIVATE METHODS //
+    /////////////////////
 
     /**
      * @private Builds the options and the payload to perform a valid JSON request
@@ -115,7 +123,7 @@ export default class PocketClient extends Pocket.API {
      * @returns options and payload for the API Request
      * 
      */
-     #buildRequest (path: string, data: any) : Pocket.RequestData {
+     #buildRequest (path: string, data: any) : PocketRequestData {
         if (typeof this.consumer_key === 'string') {
             data.consumer_key = this.consumer_key
         }
@@ -143,7 +151,7 @@ export default class PocketClient extends Pocket.API {
 
     /**
      * @private Logs the relevant information about an error from the headers 
-     * in the response message from the Pocket API. See https://getpocket.com/developer/docs/errors
+     * in the response message from the Pocket API. See https://getcom/developer/docs/errors
      * @param response HTTPS response message from the Pocket API
      */
     #logPocketError (response: IncomingMessage) : void {
