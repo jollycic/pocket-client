@@ -88,15 +88,20 @@ export default class PocketClient implements PocketAPI {
     add (article: PocketAddable) : Promise<PocketListItem> {
         return new Promise((resolve) => {
             const { options, payload } = this.#buildRequest('/v3/add', article)
+            let contents = ''
             const req = request(options, (res) => {
                 res.on('data', (data) => {
                     if (res.statusCode === 200) {
-                        const { item } = JSON.parse(data)
-                        resolve(item as PocketListItem)
+                        contents += data
                     } else {
                         this.#logPocketError(res)
                         resolve(null)
                     }
+                })
+                
+                res.on('end', () => {
+                    const { item } = JSON.parse(contents)
+                    resolve(item as PocketListItem)
                 })
             })
     
