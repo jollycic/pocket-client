@@ -5,7 +5,7 @@ import { request } from 'https'
 
 export default class PocketClient implements PocketAPI {
     /**
-     * Creates a new Pocket (https://getcom) API client
+     * Creates a new Pocket (https://getpocket.com) API client
      */
     constructor ({ consumer_key, token, logger } : PocketAPIConfig) {
 
