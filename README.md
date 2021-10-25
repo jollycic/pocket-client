@@ -11,7 +11,7 @@ on the authentication and authorization workflow and on how to obtain a platform
 
 ```javascript
 import { PocketClient } from 'pocket-client'
-import { createServer } from 'https'
+import { createServer } from 'http'
 const open = require('open') // to open the authorization webpage
 
 // Setup the client with your application consumer key
@@ -40,41 +40,23 @@ const server = createServer(async (req, res) => {
         return
     }
 
-    try {
-        // Now you can authorize your application
-        const token = await pocket.authorize()
+    // Now you can authorize your application
+    const token = await pocket.authorize()
 
-        // If the user authorized your application
-        // you’re good to go!
-        res.write(`<!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Authorized!</title>
-                </head>
-                <body>
-                    <h1>Hello ${token.username}!</h1>
-                </body>
-            </html>`
-        )
-    }
-    catch (error) {
-        console.error(error)
+    // If the user authorized your application
+    // you’re good to go!
+    res.write(`<!DOCTYPE html>
+        <html>
+            <head>
+                <title>Authorized!</title>
+            </head>
+            <body>
+                <h1>Hello ${token.username}!</h1>
+            </body>
+        </html>`
+    ).end()
         
-        // Notify the user that something went wrong
-        res.write(`<!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Error!</title>
-                </head>
-                <body>
-                    <h1>Something went wrong...</h1>
-                </body>`
-        )
-    }
-
-    res.end()
-    
-    // everything done
+    // Shut down the server once everything is done
     server.close()
 })
 
