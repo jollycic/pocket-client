@@ -65,7 +65,7 @@ type PocketAPIConfig = {
     logger?: Console
 }
 
-class PocketAPI {
+declare class PocketAPI {
     constructor (config : PocketAPIConfig)
 
     /** @readonly Pocket host for API requests */
