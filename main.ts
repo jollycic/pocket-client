@@ -116,10 +116,13 @@ export class PocketClient implements PocketAPI {
         })
     }
 
-    get (config: PocketGetOptions) : Promise<PocketList> {
-        config = config ?? {}
+    get (params: PocketGetParams, listOptions?: PocketListOptions) : Promise<PocketListItem[]> {
+        const DEFAULT_PARAMS : PocketGetParams = {
+            detailType: 'simple'
+        }
+
         return new Promise((resolve) => {
-            const { options, payload } = this.#buildRequest('/v3/get', config)
+            const { options, payload } = this.#buildRequest('/v3/get', Object.assign({}, DEFAULT_PARAMS, params, listOptions))
             let contents = ''
             const req = request(options, (res) => {
                 res.on('data', (data) => {
@@ -133,7 +136,10 @@ export class PocketClient implements PocketAPI {
 
                 res.on('end', () => {
                     const { list } = JSON.parse(contents)
-                    resolve(list as PocketList)
+
+                    resolve(Object.keys(list).map((key) => {
+                        return list[key]
+                    }) as PocketListItem[])
                 })
             })
 
@@ -146,6 +152,36 @@ export class PocketClient implements PocketAPI {
     
             req.end()
         })
+    }
+
+    getFavorites (params: PocketGetParams, listOptions?: PocketListOptions) : Promise <PocketListItem[]> {
+        const defaults: PocketGetParams = { favorite: 1 } 
+        return this.get(Object.assign({}, params, defaults), listOptions)
+    }
+
+    getUnread (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
+        const defaults: PocketGetParams = { state: 'unread' } 
+        return this.get(Object.assign({}, params, defaults), listOptions)
+    }
+
+    getArchive (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
+        const defaults: PocketGetParams = { state: 'archive' } 
+        return this.get(Object.assign({}, params, defaults), listOptions)
+    }
+
+    getArticles (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
+        const defaults: PocketGetParams = { contentType: 'article' } 
+        return this.get(Object.assign({}, params, defaults), listOptions)
+    }
+
+    getVideos (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
+        const defaults: PocketGetParams = { contentType: 'video' } 
+        return this.get(Object.assign({}, params, defaults), listOptions)
+    }
+
+    getImages (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
+        const defaults: PocketGetParams = { contentType: 'image' } 
+        return this.get(Object.assign({}, params, defaults), listOptions)
     }
 
     /////////////////////

@@ -29,19 +29,24 @@ type PocketAddable = {
     tags?: string
 }
 
-type PocketGetOptions = {
+
+type PocketListOptions = {
+    sort?: 'newest' | 'oldest' | 'title' | 'site'
+    count?: number
+    offset?: number
+}
+
+type PocketGetParams = {
     state?: 'unread' | 'archive' | 'list'
     favorite?: 0 | 1
-    sort?: 'newest' | 'oldest' | 'title' | 'site'
     contentType?: 'article' | 'image' | 'video'
     tag?: string | '_untagged_'
     detailType?: 'simple' | 'complete'
     search?: string
     domain?: string
     since?: number
-    count?: number
-    offset?: number
 }
+
 
 /** Item in a Pocket List */
 type PocketListItem = {
@@ -67,10 +72,6 @@ type PocketListItem = {
     authors: string[]
     images: string[]
     videos: string[]
-}
-
-type PocketList = {
-    list: object
 }
 
 /** Configuration object to initialize a new instance of the Pocket API client */
@@ -103,7 +104,7 @@ declare class PocketAPI {
      * @param redirect_uri URI to redirect the User to once authenticate
      * @returns Pocket URL to redirect the User to in order to authenticate
      */
-    requestAuthentication(redirect_uri: string) : Promise<URL>
+    requestAuthentication (redirect_uri: string) : Promise<URL>
 
     /**
      * Once the User has authenticated to Pocket and granted permission to your App, 
@@ -111,14 +112,68 @@ declare class PocketAPI {
      * at step 5
      * @returns Pocket Access Token and Pocket Username
      */
-    authorize() : Promise<PocketAccessToken>
+    authorize () : Promise<PocketAccessToken>
 
     /**
      * Add an Article to the User’s Pocket List
      * @param payload Article to add
      * @returns Added article
      */
-    add(article: PocketAddable) : Promise<PocketListItem>
+    add (article: PocketAddable) : Promise<PocketListItem>
 
-    get(config: PocketGetOptions) : Promise<PocketList>
+    /**
+     * Retrieves a list of items from Pocket as per 
+     * https://getpocket.com/developer/docs/v3/retrieve
+     * @param params List filtering and search parameters
+     * @param listOptions Pagination and sorting options
+     */
+    get (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+
+    /**
+     * Retrieves a list of favorite items from Pocket – alias for ``PocketClient.get`` with ``params.favorite``
+     * forced to ``1``
+     * @param params List filtering and search parameters – the ``favorite`` param is ignored)
+     * @param listOptions Pagination and sorting options
+     */
+    getFavorites (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+
+    /**
+     * Retrieves a list of unread items from Pocket – alias for ``PocketClient.get`` with ``params.state``
+     * forced to ``unread``
+     * @param params List filtering and search parameters – the ``state`` param is ignored)
+     * @param listOptions Pagination and sorting options
+     */
+    getUnread (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+
+    /**
+     * Retrieves a list of archived items from Pocket – alias for ``PocketClient.get`` with ``params.state``
+     * forced to ``archive``
+     * @param params List filtering and search parameters – the ``state`` param is ignored)
+     * @param listOptions Pagination and sorting options
+     */
+    getArchive (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+
+    /**
+     * Retrieves a list of articles from Pocket – alias for ``PocketClient.get`` with ``params.contentType``
+     * forced to ``article``
+     * @param params List filtering and search parameters – the ``contentType`` param is ignored)
+     * @param listOptions Pagination and sorting options
+     */
+    getArticles (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+
+    /**
+     * Retrieves a list of videos from Pocket – alias for ``PocketClient.get`` with ``params.contentType``
+     * forced to ``video``
+     * @param params List filtering and search parameters – the ``contentType`` param is ignored)
+     * @param listOptions Pagination and sorting options
+     */
+     getVideos (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+
+    /**
+     * Retrieves a list of images from Pocket – alias for ``PocketClient.get`` with ``params.contentType``
+     * forced to ``image``
+     * @param params List filtering and search parameters – the ``contentType`` param is ignored)
+     * @param listOptions Pagination and sorting options
+     */
+     getImages (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
 }
