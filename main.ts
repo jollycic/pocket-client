@@ -4,9 +4,7 @@ import { IncomingMessage } from 'http'
 import { request } from 'https'
 
 export class PocketClient implements PocketAPI {
-    /**
-     * Creates a new Pocket (https://getpocket.com) API client
-     */
+    /** Creates a new [Pocket](https://getpocket.com) API client */
     constructor ({ consumer_key, token, logger } : PocketAPIConfig) {
 
         this.consumer_key = consumer_key
@@ -26,6 +24,8 @@ export class PocketClient implements PocketAPI {
     username: string
     requestToken: PocketRequestToken
     logger: Console
+
+    //#region Authentication and authorization
 
     requestAuthentication (redirect_uri: string) : Promise<URL> {
         return new Promise((resolve) => {
@@ -85,6 +85,10 @@ export class PocketClient implements PocketAPI {
         })
     }
 
+    //#endregion
+
+    //#region https://getpocket.com/v3/add
+
     add (article: PocketAddable) : Promise<PocketListItem> {
         return new Promise((resolve) => {
             const { options, payload } = this.#buildRequest('/v3/add', article)
@@ -115,6 +119,10 @@ export class PocketClient implements PocketAPI {
             req.end()
         })
     }
+
+    //#endregion
+
+    //#region https://getpocket.com/v3/get
 
     get (params: PocketGetParams, listOptions?: PocketListOptions) : Promise<PocketListItem[]> {
         const DEFAULT_PARAMS : PocketGetParams = {
@@ -184,12 +192,12 @@ export class PocketClient implements PocketAPI {
         return this.get(Object.assign({}, params, defaults), listOptions)
     }
 
-    /////////////////////
-    // PRIVATE METHODS //
-    /////////////////////
+    //#endregion
+
+    //#region Private methods
 
     /**
-     * @private Builds the options and the payload to perform a valid JSON request
+     * @private Builds the options and the serialized payload to perform a valid JSON request
      * to the Pocket API
      * @param path Pocket API endpoint
      * @param data Payload to POST
@@ -231,4 +239,5 @@ export class PocketClient implements PocketAPI {
         this.logger.error(`${response.headers.status}
         Pocket Error ${response.headers['x-error-code']}: ${response.headers['x-error']}`)
     }
+    //#endregion
 }
