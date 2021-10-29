@@ -15,6 +15,12 @@ export class PocketClient implements PocketAPI {
         }
 
         this.logger = logger ?? console
+
+        this.applicationRates = {
+            limit: undefined,
+            remaining: undefined,
+            secondsToReset: undefined
+        }
     }
 
     get host () { return 'getpocket.com' }
@@ -24,6 +30,7 @@ export class PocketClient implements PocketAPI {
     username: string
     requestToken: PocketRequestToken
     logger: Console
+    applicationRates: PocketConsumerKeyRateLimits
 
     //#region Authentication and authorization
 
@@ -97,6 +104,7 @@ export class PocketClient implements PocketAPI {
                 res.on('data', (data) => {
                     if (res.statusCode === 200) {
                         contents += data
+                        this.#updateRateLimitStatus(res)
                     } else {
                         this.#logPocketError(res)
                         resolve(null)
@@ -133,6 +141,7 @@ export class PocketClient implements PocketAPI {
             const req = request(options, (res) => {
                 res.on('data', (data) => {
                     if (res.statusCode === 200) {
+                        this.#updateRateLimitStatus(res)
                         contents += data
                     } else {
                         this.#logPocketError(res)
@@ -240,6 +249,17 @@ export class PocketClient implements PocketAPI {
     #logPocketError (response: IncomingMessage) : void {
         this.logger.error(`${response.headers.status}
         Pocket Error ${response.headers['x-error-code']}: ${response.headers['x-error']}`)
+    }
+
+    /**
+     * @private Stores information about the current [rate limit](https://getpocket.com/developer/docs/rate-limits) 
+     * of the application from the headers
+     * @param response HTTPS response message from the Pocket API
+     */
+    #updateRateLimitStatus (response: IncomingMessage) : void {       
+        this.applicationRates.limit = parseInt(response.headers['x-limit-key-limit'] as string)
+        this.applicationRates.remaining = parseInt(response.headers['x-limit-key-remaining'] as string)
+        this.applicationRates.secondsToReset = parseInt(response.headers['x-limit-key-reset'] as string)
     }
     //#endregion
 }

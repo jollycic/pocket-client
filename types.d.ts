@@ -84,6 +84,15 @@ type PocketAPIConfig = {
     logger?: Console
 }
 
+type PocketConsumerKeyRateLimits = {
+    /** Current rate limit enforced per consumer key */
+    limit: number,
+    /** Number of calls remaining before hitting consumer key's rate limit */
+    remaining: number,
+    /** Seconds until consumer key rate limit resets */
+    secondsToReset: number
+}
+
 declare class PocketAPI {
     constructor (config : PocketAPIConfig)
 
@@ -97,6 +106,12 @@ declare class PocketAPI {
     access_token: string
     /** Pocket Username for display purposes */
     username: string
+    /** 
+     * If at least one request to the Pocket API has been made, the
+     * [rate limits](https://getpocket.com/developer/docs/rate-limits) relative to
+     * the current consumer key are stored in this variable, otherwise all values are ``undefined``
+     * */
+    applicationRates: PocketConsumerKeyRateLimits
 
     /**
      * Requests authentication to the Pocket API as per https://getpocket.com/developer/docs/authentication
