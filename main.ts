@@ -89,7 +89,7 @@ export class PocketClient implements PocketAPI {
 
     //#region https://getpocket.com/v3/add
 
-    add (article: PocketAddable) : Promise<PocketListItem> {
+    add (article: PocketItemToAdd) : Promise<PocketListItem> {
         return new Promise((resolve) => {
             const { options, payload } = this.#buildRequest('/v3/add', article)
             let contents = ''
@@ -125,9 +125,7 @@ export class PocketClient implements PocketAPI {
     //#region https://getpocket.com/v3/get
 
     get (params: PocketGetParams, listOptions?: PocketListOptions) : Promise<PocketListItem[]> {
-        const DEFAULT_PARAMS : PocketGetParams = {
-            detailType: 'simple'
-        }
+        const DEFAULT_PARAMS : PocketGetParams = { detailType: 'simple' }
 
         return new Promise((resolve) => {
             const { options, payload } = this.#buildRequest('/v3/get', Object.assign({}, DEFAULT_PARAMS, params, listOptions))
@@ -163,37 +161,41 @@ export class PocketClient implements PocketAPI {
     }
 
     getFavorites (params: PocketGetParams, listOptions?: PocketListOptions) : Promise <PocketListItem[]> {
-        const defaults: PocketGetParams = { favorite: 1 } 
-        return this.get(Object.assign({}, params, defaults), listOptions)
+        const override: PocketGetParams = { favorite: 1 } 
+        return this.get(Object.assign({}, params, override), listOptions)
     }
 
     getUnread (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
-        const defaults: PocketGetParams = { state: 'unread' } 
-        return this.get(Object.assign({}, params, defaults), listOptions)
+        const override: PocketGetParams = { state: 'unread' } 
+        return this.get(Object.assign({}, params, override), listOptions)
     }
 
     getArchive (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
-        const defaults: PocketGetParams = { state: 'archive' } 
-        return this.get(Object.assign({}, params, defaults), listOptions)
+        const override: PocketGetParams = { state: 'archive' } 
+        return this.get(Object.assign({}, params, override), listOptions)
     }
 
     getArticles (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
-        const defaults: PocketGetParams = { contentType: 'article' } 
-        return this.get(Object.assign({}, params, defaults), listOptions)
+        const override: PocketGetParams = { contentType: 'article' } 
+        return this.get(Object.assign({}, params, override), listOptions)
     }
 
     getVideos (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
-        const defaults: PocketGetParams = { contentType: 'video' } 
-        return this.get(Object.assign({}, params, defaults), listOptions)
+        const override: PocketGetParams = { contentType: 'video' } 
+        return this.get(Object.assign({}, params, override), listOptions)
     }
 
     getImages (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
-        const defaults: PocketGetParams = { contentType: 'image' } 
-        return this.get(Object.assign({}, params, defaults), listOptions)
+        const override: PocketGetParams = { contentType: 'image' } 
+        return this.get(Object.assign({}, params, override), listOptions)
     }
 
     //#endregion
 
+    send (actions: object) {
+
+    }
+    
     //#region Private methods
 
     /**

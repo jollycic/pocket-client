@@ -20,7 +20,7 @@ type PocketAccessToken = {
 }
 
 /** Data to save a single item */
-type PocketAddable = {
+type PocketItemToAdd = {
     /** The URL of the item to save */
     url: string
     /** Ignored if Pocket detects a title from the content at the URL */
@@ -119,7 +119,7 @@ declare class PocketAPI {
      * @param payload Article to add
      * @returns Added article
      */
-    add (article: PocketAddable) : Promise<PocketListItem>
+    add (article: PocketItemToAdd) : Promise<PocketListItem>
 
     /**
      * Retrieves a list of items from Pocket as per 
