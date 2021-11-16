@@ -93,6 +93,14 @@ type PocketConsumerKeyRateLimits = {
     secondsToReset: number
 }
 
+type PocketActionResults = {
+    action: string,
+    item_id: number,
+    success: any[],
+    error: any[],
+    status: 0 | 1
+}
+
 declare class PocketAPI {
     constructor (config : PocketAPIConfig)
 

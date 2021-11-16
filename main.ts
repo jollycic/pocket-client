@@ -201,8 +201,74 @@ export class PocketClient implements PocketAPI {
 
     //#endregion
 
-    send (actions: object) {
+    send (actions: object[]) : Promise<PocketActionResults[]> {
+        return new Promise((resolve) => {
 
+            const { options, payload } = this.#buildRequest('/v3/send', Object.assign({}, { actions }))
+            let contents = ''
+            const req = request(options, (res) => {
+                res.on('data', (data) => {
+                    if (res.statusCode === 200) {
+                        this.#updateRateLimitStatus(res)
+                        contents += data
+                    } else {
+                        this.#logPocketError(res)
+                        resolve(null)
+                    }
+                })
+
+                res.on('end', () => {
+                    const results = JSON.parse(contents)
+                    resolve(actions.map((action, index) => {
+                        return Object.assign({}, action, { 
+                            success: results.action_results[index], 
+                            error:  results.action_errors[index],
+                        }) as PocketActionResults
+                    }))
+                })
+            })
+
+            req.on('error', (err) => {
+                this.logger.error(err)
+                resolve(null)
+            })
+
+            req.write(payload)
+    
+            req.end()
+        })
+    }
+
+    async archive (items: number[]) : Promise<PocketActionResults[]> {
+        return await this.send(items.map((item_id) => ({
+            action: 'archive',
+            item_id,
+            time: new Date().getTime()
+        })))
+    }
+
+    async readd (items: number[]) : Promise<PocketActionResults[]> {
+        return await this.send(items.map((item_id) => ({
+            action: 'readd',
+            item_id,
+            time: new Date().getTime()
+        })))
+    }
+
+    async favorite (items: number[]) : Promise<PocketActionResults[]> {
+        return await this.send(items.map((item_id) => ({
+            action: 'favorite',
+            item_id,
+            time: new Date().getTime()
+        })))
+    }
+
+    async unfavorite (items: number[]) : Promise<PocketActionResults[]> {
+        return await this.send(items.map((item_id) => ({
+            action: 'unfavorite',
+            item_id,
+            time: new Date().getTime()
+        })))
     }
     
     //#region Private methods

@@ -1,11 +1,12 @@
 {
     "name": "pocket-client",
     "version": "0.1.0",
-    "description": "Typescript ",
+    "description": "Unofficial HTTPS client for Node that abstracts the Pocket v3 API for manipulating reading lists, bookmarks, and tags",
     "main": "main.js",
     "scripts": {
         "dev": "esbuild main.ts --bundle --outdir=. --platform=node  --target=es2016 --format=cjs --sourcemap=inline --watch",
-        "build": "esbuild main.ts --bundle --outdir=. --platform=node  --target=es2016 --format=cjs"
+        "build": "esbuild main.ts --bundle --outdir=. --platform=node  --target=es2016 --format=cjs",
+        "version": "npm run build && git add main.js"
     },
     "keywords": [],
     "license": "MIT",
