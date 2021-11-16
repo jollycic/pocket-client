@@ -37,7 +37,7 @@ type PocketListOptions = {
 }
 
 type PocketGetParams = {
-    state?: 'unread' | 'archive' | 'list'
+    state?: 'unread' | 'archive' | 'all'
     favorite?: 0 | 1
     contentType?: 'article' | 'image' | 'video'
     tag?: string | '_untagged_'
@@ -93,19 +93,18 @@ type PocketConsumerKeyRateLimits = {
     secondsToReset: number
 }
 
-type PocketActionResults = {
+type PocketBasicActionResult = {
     action: string,
     item_id: number,
-    success: any[],
-    error: any[],
-    status: 0 | 1
+    success: boolean | PocketListItem,
+    error: any
 }
 
 declare class PocketAPI {
     constructor (config : PocketAPIConfig)
 
     /** @readonly Pocket host for API requests */
-    get host() : string
+    get host () : string
     /** Pocket Application Consumer Key, used in each request */
     consumer_key: string
     /** Stored Pocket Authentication Request Token, used to authorize the User  */
@@ -161,6 +160,14 @@ declare class PocketAPI {
     getFavorites (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
 
     /**
+     * Retrieves a list of items from Pocket, both unread and archived – alias for ``PocketClient.get`` 
+     * with ``params.state`` forced to ``all``
+     * @param params List filtering and search parameters – the ``state`` param is ignored)
+     * @param listOptions Pagination and sorting options
+     */
+     getAll (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+
+    /**
      * Retrieves a list of unread items from Pocket – alias for ``PocketClient.get`` with ``params.state``
      * forced to ``unread``
      * @param params List filtering and search parameters – the ``state`` param is ignored)
@@ -190,7 +197,7 @@ declare class PocketAPI {
      * @param params List filtering and search parameters – the ``contentType`` param is ignored)
      * @param listOptions Pagination and sorting options
      */
-     getVideos (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+    getVideos (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
 
     /**
      * Retrieves a list of images from Pocket – alias for ``PocketClient.get`` with ``params.contentType``
@@ -198,5 +205,5 @@ declare class PocketAPI {
      * @param params List filtering and search parameters – the ``contentType`` param is ignored)
      * @param listOptions Pagination and sorting options
      */
-     getImages (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
+    getImages (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]>
 }

@@ -174,6 +174,11 @@ export class PocketClient implements PocketAPI {
         return this.get(Object.assign({}, params, override), listOptions)
     }
 
+    getAll (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
+        const override: PocketGetParams = { state: 'all' } 
+        return this.get(Object.assign({}, params, override), listOptions)
+    }
+
     getUnread (params: PocketGetParams, listOptions: PocketListOptions) : Promise<PocketListItem[]> {
         const override: PocketGetParams = { state: 'unread' } 
         return this.get(Object.assign({}, params, override), listOptions)
@@ -201,7 +206,8 @@ export class PocketClient implements PocketAPI {
 
     //#endregion
 
-    send (actions: object[]) : Promise<PocketActionResults[]> {
+    #performBasicActions (actions: object[]) : Promise<PocketBasicActionResult[]> {
+        
         return new Promise((resolve) => {
 
             const { options, payload } = this.#buildRequest('/v3/send', Object.assign({}, { actions }))
@@ -223,7 +229,7 @@ export class PocketClient implements PocketAPI {
                         return Object.assign({}, action, { 
                             success: results.action_results[index], 
                             error:  results.action_errors[index],
-                        }) as PocketActionResults
+                        }) as PocketBasicActionResult
                     }))
                 })
             })
@@ -239,33 +245,41 @@ export class PocketClient implements PocketAPI {
         })
     }
 
-    async archive (items: number[]) : Promise<PocketActionResults[]> {
-        return await this.send(items.map((item_id) => ({
+    async archive (items: number[]) : Promise<PocketBasicActionResult[]> {
+        return await this.#performBasicActions(items.map((item_id) => ({
             action: 'archive',
             item_id,
             time: new Date().getTime()
         })))
     }
 
-    async readd (items: number[]) : Promise<PocketActionResults[]> {
-        return await this.send(items.map((item_id) => ({
+    async readd (items: number[]) : Promise<PocketBasicActionResult[]> {
+        return await this.#performBasicActions(items.map((item_id) => ({
             action: 'readd',
             item_id,
             time: new Date().getTime()
         })))
     }
 
-    async favorite (items: number[]) : Promise<PocketActionResults[]> {
-        return await this.send(items.map((item_id) => ({
+    async favorite (items: number[]) : Promise<PocketBasicActionResult[]> {
+        return await this.#performBasicActions(items.map((item_id) => ({
             action: 'favorite',
             item_id,
             time: new Date().getTime()
         })))
     }
 
-    async unfavorite (items: number[]) : Promise<PocketActionResults[]> {
-        return await this.send(items.map((item_id) => ({
+    async unfavorite (items: number[]) : Promise<PocketBasicActionResult[]> {
+        return await this.#performBasicActions(items.map((item_id) => ({
             action: 'unfavorite',
+            item_id,
+            time: new Date().getTime()
+        })))
+    }
+
+    async delete (items: number[]) : Promise<PocketBasicActionResult[]> {
+        return await this.#performBasicActions(items.map((item_id) => ({
+            action: 'delete',
             item_id,
             time: new Date().getTime()
         })))
