@@ -96,36 +96,49 @@ export class PocketClient implements PocketAPI {
 
     //#region https://getpocket.com/v3/add
 
-    add (article: PocketItemToAdd) : Promise<PocketListItem> {
-        return new Promise((resolve) => {
-            const { options, payload } = this.#buildRequest('/v3/add', article)
-            let contents = ''
-            const req = request(options, (res) => {
-                res.on('data', (data) => {
-                    if (res.statusCode === 200) {
-                        contents += data
-                        this.#updateRateLimitStatus(res)
-                    } else {
-                        this.#logPocketError(res)
-                        resolve(null)
-                    }
-                })
-                
-                res.on('end', () => {
-                    const { item } = JSON.parse(contents)
-                    resolve(item as PocketListItem)
-                })
-            })
-    
-            req.on('error', (err) => {
-                this.logger.error(err)
-                resolve(null)
-            })
+    /**
+     * @todo Test edge cases and exception handling
+     */
+    async add (items: PocketItemToAdd | PocketItemToAdd[]) : Promise<PocketListItem[]> {
+        if (Array.isArray(items)) {
+            const results = await this.#performBasicActions(items.map((item) => ({
+                action: 'add',
+                time: new Date().getTime(),
+                ...item
+            }))) as PocketBasicActionResult[]
 
-            req.write(payload)
+            return results.map(result => (result.success as PocketListItem))
+        } else {
+            return new Promise((resolve) => {
+                const { options, payload } = this.#buildRequest('/v3/add', items)
+                let contents = ''
+                const req = request(options, (res) => {
+                    res.on('data', (data) => {
+                        if (res.statusCode === 200) {
+                            contents += data
+                            this.#updateRateLimitStatus(res)
+                        } else {
+                            this.#logPocketError(res)
+                            resolve(null)
+                        }
+                    })
+                    
+                    res.on('end', () => {
+                        const { item } = JSON.parse(contents)
+                        resolve([ item as PocketListItem ])
+                    })
+                })
+        
+                req.on('error', (err) => {
+                    this.logger.error(err)
+                    resolve(null)
+                })
     
-            req.end()
-        })
+                req.write(payload)
+        
+                req.end()
+            })
+        }
     }
 
     //#endregion

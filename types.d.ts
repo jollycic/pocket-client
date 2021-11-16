@@ -137,11 +137,11 @@ declare class PocketAPI {
     authorize () : Promise<PocketAccessToken>
 
     /**
-     * Add an Article to the User’s Pocket List
-     * @param payload Article to add
-     * @returns Added article
+     * Add one or more Articles to the User’s Pocket List
+     * @param items Articles to add (may be a single item or an array)
+     * @returns Array of added articles
      */
-    add (article: PocketItemToAdd) : Promise<PocketListItem>
+    add (items: PocketItemToAdd | PocketItemToAdd[]) : Promise<PocketListItem[]>
 
     /**
      * Retrieves a list of items from Pocket as per 
